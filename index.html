@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>莹莹 · 借钱还钱记录</title>
+<style>
+  *{box-sizing:border-box;margin:0;padding:0}
+  :root{
+    --paper:#f7f3ea; --card:#fffdf8; --ink:#2b2620; --ink2:#6d6558;
+    --line:#e4dccb; --out:#b0523a; --in:#3f7a5c; --gold:#a98a4b;
+  }
+  body{
+    font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",sans-serif;
+    background:var(--paper); color:var(--ink); line-height:1.6;
+    padding:28px 16px 64px; -webkit-font-smoothing:antialiased;
+    background-image:radial-gradient(circle at 12% 8%, #efe7d6 0%, transparent 42%),
+                     radial-gradient(circle at 88% 4%, #f0e9dc 0%, transparent 38%);
+    background-attachment:fixed;
+  }
+  .wrap{max-width:940px;margin:0 auto}
+  header{text-align:center;padding:8px 0 22px}
+  .kicker{font-size:11px;letter-spacing:.34em;color:var(--gold);text-transform:uppercase;margin-bottom:10px}
+  h1{font-size:23px;font-weight:600;letter-spacing:.02em}
+  h1 em{font-style:normal;color:var(--out)}
+  .sub{font-size:12.5px;color:var(--ink2);margin-top:8px}
+  .range{display:inline-block;margin-top:11px;font-size:11.5px;color:#8a7f68;
+    background:#f0e9d9;border:1px solid #e3d8c2;border-radius:20px;padding:4px 14px;letter-spacing:.03em}
+
+  .hero{
+    background:var(--card);border:1px solid var(--line);border-radius:18px;
+    padding:26px 22px;margin-bottom:18px;text-align:center;
+    box-shadow:0 2px 20px rgba(120,100,70,.07);
+  }
+  .hero .label{font-size:12px;color:var(--ink2);letter-spacing:.14em}
+  .hero .big{font-size:44px;font-weight:650;color:var(--out);letter-spacing:-.01em;margin:6px 0 2px;
+    font-variant-numeric:tabular-nums}
+  .hero .big span{font-size:20px;font-weight:500;margin-right:2px}
+  .hero .note{font-size:12px;color:var(--ink2);margin-top:6px}
+
+  .stats{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:22px}
+  .stat{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:14px 12px;text-align:center}
+  .stat .k{font-size:11.5px;color:var(--ink2);margin-bottom:4px}
+  .stat .v{font-size:19px;font-weight:600;font-variant-numeric:tabular-nums}
+  .stat .v.o{color:var(--out)} .stat .v.i{color:var(--in)}
+  .stat .c{font-size:11px;color:#9a9284;margin-top:2px}
+
+  h2{font-size:14px;font-weight:600;margin:26px 0 12px;padding-left:11px;border-left:3px solid var(--gold);letter-spacing:.04em}
+  .hint{font-size:11.5px;color:#a49b8b;margin:-6px 0 12px 14px}
+  .tblbox{background:var(--card);border:1px solid var(--line);border-radius:16px;overflow:hidden;
+    box-shadow:0 2px 16px rgba(120,100,70,.06)}
+  table{width:100%;border-collapse:collapse;font-size:13.5px}
+  thead th{background:#f2ece0;color:var(--ink2);font-size:11.5px;font-weight:600;letter-spacing:.08em;
+    padding:11px 8px;text-align:left;white-space:nowrap;border-bottom:1px solid var(--line)}
+  tbody td{padding:12px 8px;border-bottom:1px solid #efe9dd;vertical-align:middle}
+  tbody tr:last-child td{border-bottom:none}
+  .idx{color:#b3aa99;font-size:11px;width:26px;text-align:center}
+  .date b{display:block;font-weight:600;font-size:13px;font-variant-numeric:tabular-nums}
+  .date i{font-style:normal;font-size:11px;color:#a49b8b}
+  .arrow{font-size:12.5px;font-weight:500;white-space:nowrap}
+  .out-arrow{color:var(--out)} .in-arrow{color:var(--in)}
+  .pill{display:inline-block;font-size:11px;padding:2px 8px;border-radius:20px;
+    background:#f0eadc;color:#7d7360;white-space:nowrap}
+  .amt{text-align:right;white-space:nowrap}
+  .m{font-variant-numeric:tabular-nums;font-weight:650;font-size:14.5px}
+  .out-m{color:var(--out)} .in-m{color:var(--in)}
+  .tag{display:inline-block;font-size:10.5px;padding:1.5px 7px;border-radius:5px;font-weight:600;white-space:nowrap}
+  .tag-out{background:#fbeee9;color:var(--out)}
+  .tag-in{background:#eaf3ee;color:var(--in)}
+  .stx{display:block;font-style:normal;font-size:10.5px;color:#a49b8b;margin-top:2px}
+  .run{text-align:right;font-variant-numeric:tabular-nums;font-size:13px;color:#6d6558;white-space:nowrap}
+  tr.has-memo td{border-bottom:none}
+  tr.memo-row td{padding:0 8px 14px 40px;border-bottom:1px solid #efe9dd}
+  .memo{display:block;font-size:12.5px;color:#6f6759;line-height:1.72;
+    background:#faf6ec;border-left:2px solid #dfd1b4;border-radius:0 9px 9px 0;padding:8px 12px}
+  .memo b{display:inline-block;color:#9a7f43;font-weight:600;margin-right:7px}
+  tfoot td{padding:13px 8px;background:#f6f1e6;font-weight:600;font-size:13.5px;border-top:1.5px solid var(--line)}
+  tfoot .tf{text-align:right;color:var(--out);font-size:15px;font-variant-numeric:tabular-nums}
+
+  .callout{background:var(--card);border:1px solid var(--line);border-left:3px solid var(--gold);
+    border-radius:0 12px 12px 0;padding:15px 17px;margin-top:12px;font-size:13px;color:#514a3e}
+  .callout b{color:var(--ink)}
+  .callout ul{margin:8px 0 0 17px}
+  .callout li{margin-bottom:6px}
+  footer{text-align:center;font-size:11.5px;color:#a49b8b;margin-top:30px;line-height:1.9}
+
+  @media(max-width:640px){
+    body{padding:20px 11px 48px}
+    h1{font-size:20px}
+    .hero .big{font-size:34px}
+    .stats{grid-template-columns:1fr;gap:8px}
+    .stat{display:flex;align-items:center;justify-content:space-between;padding:11px 14px;text-align:left}
+    .stat .k{margin:0} .stat .c{display:none}
+    table{font-size:12.5px}
+    thead th{padding:9px 5px;font-size:10.5px;letter-spacing:0}
+    tbody td{padding:10px 5px}
+    .idx,.run{display:none}
+    thead th:nth-child(1),thead th:nth-child(7){display:none}
+    .pill{font-size:10px;padding:1px 6px}
+    .m{font-size:13.5px}
+    .stx{display:none}
+    tr.memo-row td{padding:0 5px 12px 5px}
+    .memo{font-size:12px;line-height:1.7;padding:7px 10px}
+    .memo b{display:block;margin:0 0 3px}
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div class="kicker">Loan Record</div>
+    <h1>我和<em>莹莹</em>的借钱还钱记录</h1>
+    <div class="sub">微信支付账单 · 共 9 笔借钱/还钱</div>
+    <div class="range">统计区间 2026-03-07 至 2026-10-28</div>
+  </header>
+
+  <div class="hero">
+    <div class="label">目前她还欠你</div>
+    <div class="big"><span>¥</span>380.00</div>
+    <div class="note">借给她 500.00，她还了 120.00</div>
+  </div>
+
+  <div class="stats">
+    <div class="stat"><div class="k">借给她</div><div class="v o">500.00</div><div class="c">5 笔</div></div>
+    <div class="stat"><div class="k">她还我</div><div class="v i">120.00</div><div class="c">4 笔</div></div>
+    <div class="stat"><div class="k">还欠着</div><div class="v o">380.00</div><div class="c">借给她 − 她还我</div></div>
+  </div>
+
+  <h2>借钱还钱明细（按时间先后）</h2>
+  <div class="hint">每笔下面灰底那段，是对照当天聊天截图整理的借钱/还钱原因</div>
+  <div class="tblbox">
+    <table>
+      <thead>
+        <tr>
+          <th>#</th><th>日期</th><th>谁转给谁</th><th>方式</th><th style="text-align:right">金额</th><th>性质</th><th style="text-align:right">累计欠款</th>
+        </tr>
+      </thead>
+      <tbody>
+      <tr class="row out has-memo">
+        <td class="idx">1</td>
+        <td class="date"><b>2026-03-07</b><i>17:02</i></td>
+        <td class="who"><span class="arrow out-arrow">我 → 莹莹</span></td>
+        <td class="way"><span class="pill">转账</span></td>
+        <td class="amt"><span class="m out-m">+200.00</span></td>
+        <td class="st"><span class="tag tag-out">借钱</span><i class="stx">对方已收钱</i></td>
+        <td class="run">200.00</td>
+      </tr>
+      <tr class="memo-row"><td colspan="7">
+        <span class="memo"><b>借 200 交上班押金</b>她要借 200 块去上班交押金，第二天报到、放学后送外卖，能做到晚上九、十点。你说「我和你一样大的时候根本没有像你一样懂事」，还问她爸爸不给生活费吗。</span>
+      </td></tr>
+      <tr class="row in has-memo">
+        <td class="idx">2</td>
+        <td class="date"><b>2026-03-26</b><i>16:37</i></td>
+        <td class="who"><span class="arrow in-arrow">莹莹 → 我</span></td>
+        <td class="way"><span class="pill">转账</span></td>
+        <td class="amt"><span class="m in-m">−20.00</span></td>
+        <td class="st"><span class="tag tag-in">还钱</span><i class="stx">已转入零钱通</i></td>
+        <td class="run">180.00</td>
+      </tr>
+      <tr class="memo-row"><td colspan="7">
+        <span class="memo"><b>先还 20，工资还没发</b>她主动转来 20 还钱，说「抱歉啊这么久还没还你」，工资还没发。你回「好的莹莹，剩下的你发工资了再给我」，还夸她比以前懂事了。</span>
+      </td></tr>
+      <tr class="row out has-memo">
+        <td class="idx">3</td>
+        <td class="date"><b>2026-03-31</b><i>18:00</i></td>
+        <td class="who"><span class="arrow out-arrow">我 → 莹莹</span></td>
+        <td class="way"><span class="pill">转账</span></td>
+        <td class="amt"><span class="m out-m">+100.00</span></td>
+        <td class="st"><span class="tag tag-out">借钱</span><i class="stx">对方已收钱</i></td>
+        <td class="run">280.00</td>
+      </tr>
+      <tr class="memo-row"><td colspan="7">
+        <span class="memo"><b>本想借 300，只借了 100</b>她开口想借 300（发工资还没到账、周末去兼职两天），你生活费也紧了，只借了 100 并说「能力有限，抱歉哦」。当时她正患流感，你还提醒她骑车慢点、记得她去年摔过一次。</span>
+      </td></tr>
+      <tr class="row in has-memo">
+        <td class="idx">4</td>
+        <td class="date"><b>2026-04-12</b><i>21:00</i></td>
+        <td class="who"><span class="arrow in-arrow">莹莹 → 我</span></td>
+        <td class="way"><span class="pill">转账</span></td>
+        <td class="amt"><span class="m in-m">−30.00</span></td>
+        <td class="st"><span class="tag tag-in">还钱</span><i class="stx">已转入零钱通</i></td>
+        <td class="run">250.00</td>
+      </tr>
+      <tr class="memo-row"><td colspan="7">
+        <span class="memo"><b>主动问欠多少，先还 30</b>她问「硕硕我欠你多少呀」，你说「欠了 280」，她说「我先还你几十可以吗，我留点吃饭」，最后先还了 30。</span>
+      </td></tr>
+      <tr class="row in has-memo">
+        <td class="idx">5</td>
+        <td class="date"><b>2026-04-19</b><i>16:47</i></td>
+        <td class="who"><span class="arrow in-arrow">莹莹 → 我</span></td>
+        <td class="way"><span class="pill">转账</span></td>
+        <td class="amt"><span class="m in-m">−20.00</span></td>
+        <td class="st"><span class="tag tag-in">还钱</span><i class="stx">已转入零钱通</i></td>
+        <td class="run">230.00</td>
+      </tr>
+      <tr class="memo-row"><td colspan="7">
+        <span class="memo"><b>还 20，跑车没赚到钱</b>她转来 20 还钱，说「我怕我还的很慢」「我跑了好久都没把车钱跑回来」「上班太累了」。你说「没事，反正你慢慢还就行」。</span>
+      </td></tr>
+      <tr class="row out has-memo">
+        <td class="idx">6</td>
+        <td class="date"><b>2026-10-13</b><i>22:55</i></td>
+        <td class="who"><span class="arrow out-arrow">我 → 莹莹</span></td>
+        <td class="way"><span class="pill">转账</span></td>
+        <td class="amt"><span class="m out-m">+50.00</span></td>
+        <td class="st"><span class="tag tag-out">借钱</span><i class="stx">对方已收钱</i></td>
+        <td class="run">280.00</td>
+      </tr>
+      <tr class="memo-row"><td colspan="7">
+        <span class="memo"><b>打完疫苗只剩几块，借 50 吃饭</b>她说「我今天打完疫苗只剩几块钱了，可不可以借五十吃饭呀，我不好意思问我爸爸要了」。你还追问以前那两百多怎么算，她说「我还你三百，因为欠了太久了」，你让她先解决吃饭。</span>
+      </td></tr>
+      <tr class="row in has-memo">
+        <td class="idx">7</td>
+        <td class="date"><b>2026-10-19</b><i>00:10</i></td>
+        <td class="who"><span class="arrow in-arrow">莹莹 → 我</span></td>
+        <td class="way"><span class="pill">转账</span></td>
+        <td class="amt"><span class="m in-m">−50.00</span></td>
+        <td class="st"><span class="tag tag-in">还钱</span><i class="stx">已转入零钱通</i></td>
+        <td class="run">230.00</td>
+      </tr>
+      <tr class="memo-row"><td colspan="7">
+        <span class="memo"><b>先还 50，要留 20 吃饭</b>她转来 50 说「先还你 50 硕硕」，又说「我留 20 吃饭」。聊天里提到疫苗还有两针没打、下个月七号还要再打一针。</span>
+      </td></tr>
+      <tr class="row out has-memo">
+        <td class="idx">8</td>
+        <td class="date"><b>2026-10-25</b><i>17:35</i></td>
+        <td class="who"><span class="arrow out-arrow">我 → 莹莹</span></td>
+        <td class="way"><span class="pill">转账</span></td>
+        <td class="amt"><span class="m out-m">+50.00</span></td>
+        <td class="st"><span class="tag tag-out">借钱</span><i class="stx">对方已收钱</i></td>
+        <td class="run">280.00</td>
+      </tr>
+      <tr class="memo-row"><td colspan="7">
+        <span class="memo"><b>再借 50 吃饭，说发工资就还</b>她说「就是可不可以再借 50 我吃饭呀，我发工资了给你」，你回「好呀」。她说「谢谢你呀硕硕，要不是你我都不知道咋办了」。</span>
+      </td></tr>
+      <tr class="row out has-memo">
+        <td class="idx">9</td>
+        <td class="date"><b>2026-10-28</b><i>21:21</i></td>
+        <td class="who"><span class="arrow out-arrow">我 → 莹莹</span></td>
+        <td class="way"><span class="pill">转账</span></td>
+        <td class="amt"><span class="m out-m">+100.00</span></td>
+        <td class="st"><span class="tag tag-out">借钱</span><i class="stx">对方已收钱</i></td>
+        <td class="run">380.00</td>
+      </tr>
+      <tr class="memo-row"><td colspan="7">
+        <span class="memo"><b>借 100，说明天找爸爸要了就还</b>她说「硕硕可不可以借我 100 呀，我明天找我爸爸要了给你」，你回「行，你自己合理安排」，她说「好的好的，谢谢你硕硕，我会还给你的」。</span>
+      </td></tr>
+      </tbody>
+      <tfoot>
+        <tr>
+          <td colspan="4">合计 · 借给她 500.00 − 已还 120.00</td>
+          <td class="tf">¥380.00</td>
+          <td colspan="2"></td>
+        </tr>
+      </tfoot>
+    </table>
+  </div>
+
+  <footer>
+    数据来源：微信支付账单流水（个人对账用）<br>
+    你转出但她未收款、已自动退回的 2 笔（共 45.00 元）未列入<br>
+    
+    按你的要求未计入：2026-08-30 20.00 元<br>
+    生成于 2026-10-28
+  </footer>
+</div>
+</body>
+</html>
